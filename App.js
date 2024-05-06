@@ -2,12 +2,18 @@ import React from 'react';
 import { Button, FlatList, View, Image, TouchableOpacity, Text, StyleSheet, Modal } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { categoriesData } from './components/categoriesData';
+// import styles from './components/styles';
 import CategoryScreen from './components/categoryScreen';
 import SettingsScreen from './components/settingsScreen';
 import Icon from 'react-native-vector-icons/Ionicons';
+import RecommendedScreen from './components/recommendedScreen';
+// import { sendFeedback } from './components/api';
+
 
 const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
 
 function CategoriesScreen({ navigation }) {
   return (
@@ -60,33 +66,81 @@ const styles = StyleSheet.create({
   }
 });
 
+function CategoriesStack(){
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="Categories"
+        component={CategoriesScreen}
+        options={({ navigation }) => ({
+          title: "Categories",
+          headerRight: () => (
+            <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
+              <Icon name="settings-outline" size={25} color="#000" />
+            </TouchableOpacity>
+          ),
+        })}
+      />
+      <Stack.Screen 
+        name="Category" 
+        component={CategoryScreen}
+        options={({ route }) => ({ title: route.params.category.title })}
+      />
+      <Stack.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{ title: "Settings" }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function RecommendedStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="Recommended"
+        component={RecommendedScreen}
+        options={({ navigation }) => ({
+          headerRight: () => (
+            <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
+              <Icon name="settings-outline" size={25} color="#000" />
+            </TouchableOpacity>
+          ),
+        })}
+      />
+      <Stack.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{ title: "Settings" }}
+      />
+    </Stack.Navigator>
+  );
+}
+
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen 
+      <Tab.Navigator screenOptions={{ headerShown: false }}>
+        <Tab.Screen 
           name="Categories" 
-          component={CategoriesScreen}
-          options={({ navigation }) => ({
-            title: "Categories",
-            headerRight: () => (
-              <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
-                <Icon name="settings-outline" size={25} color="#000" />
-              </TouchableOpacity>
+          component={CategoriesStack} 
+          options={{
+            tabBarIcon: ({ color, size }) => (
+              <Icon name="list" color={color} size={size} />
             ),
-          })}
+          }} 
         />
-        <Stack.Screen 
-          name="Category" 
-          component={CategoryScreen} 
-          options={({ route }) => ({ title: route.params.category.title })}
+        <Tab.Screen 
+          name="Recommended" 
+          component={RecommendedStack}
+          options={{
+            tabBarIcon: ({ color, size }) => (
+              <Icon name="star" color={color} size={size} />
+            ),
+          }}
         />
-        <Stack.Screen
-          name="Settings"
-          component={SettingsScreen}
-          options={{ title: "Settings" }}
-        />
-      </Stack.Navigator>
+      </Tab.Navigator>
     </NavigationContainer>
   );
 }

@@ -1,25 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
+// import styles from './components/styles';
+import { sendFeedback } from '../components/api'; // Import the sendFeedback function
+// import ScoreContext from '../components/scoreContext'; 
+
 
 const CategoryScreen = ({ route }) => {
   const { category } = route.params;
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
 
+  // const { dispatch } = useContext(ScoreContext);
+
   const openImage = (image) => {
     setSelectedImage(image);
     setModalVisible(true);
+  };
+
+  const handleFeedback = (score) => {
+    if (selectedImage) {
+      sendFeedback(selectedImage.id, score);  // Send feedback to server
+      // dispatch({ type: 'UPDATE_SCORE', id: selectedImage.id, score: score }); // Update local score
+    }
+    setModalVisible(false);
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {category.images.map((image, index) => (
         <TouchableOpacity key={index} onPress={() => openImage(image)} style={styles.imageContainer}>
-          <Image 
-            source={image.src} 
-            style={styles.image}
-            onLoad={() => console.log('Image loaded!')}
-          />
+          <Image source={image.src} style={styles.image} />
           <Text style={styles.description}>{image.description}</Text>
         </TouchableOpacity>
       ))}
@@ -38,6 +48,20 @@ const CategoryScreen = ({ route }) => {
             </TouchableOpacity>
             {selectedImage && <Image source={selectedImage.src} style={styles.fullscreenImage} />}
             <Text style={styles.imageDescription}>{selectedImage ? selectedImage.description : ''}</Text>
+            <View style={styles.smileyContainer}>
+              <TouchableOpacity onPress={() => handleFeedback(4)}>
+                <Image source={require('../assets/a.png')} style={styles.smileyIcon} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleFeedback(3)}>
+                <Image source={require('../assets/b.png')} style={styles.smileyIcon} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleFeedback(2)}>
+                <Image source={require('../assets/a.png')} style={styles.smileyIcon} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleFeedback(1)}>
+                <Image source={require('../assets/b.png')} style={styles.smileyIcon} />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -113,6 +137,17 @@ const styles = StyleSheet.create({
       fontSize: 16,
       textAlign: 'center',
       marginTop: 20,
+    },
+    smileyContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      width: '100%',
+      padding: 20,
+    },
+    smileyIcon: {
+      width: 50,
+      height: 50,
+      resizeMode: 'contain',
     },
   });
   
