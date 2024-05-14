@@ -61,6 +61,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   text: {
+    fontSize: 25,
+    // fontWeight: 'bold',
     padding: 10,
     marginBottom: 10,
   }
@@ -73,7 +75,7 @@ function CategoriesStack(){
         name="Categories"
         component={CategoriesScreen}
         options={({ navigation }) => ({
-          title: "Categories",
+          title: "Kategorijos",
           headerRight: () => (
             <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
               <Icon name="settings-outline" size={25} color="#000" />
@@ -89,7 +91,7 @@ function CategoriesStack(){
       <Stack.Screen
         name="Settings"
         component={SettingsScreen}
-        options={{ title: "Settings" }}
+        options={{ title: "Nustatymai" }}
       />
     </Stack.Navigator>
   );
@@ -99,7 +101,7 @@ function RecommendedStack() {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name="Recommended"
+        name="Rekomenduojami"
         component={RecommendedScreen}
         options={({ navigation }) => ({
           headerRight: () => (
@@ -112,7 +114,7 @@ function RecommendedStack() {
       <Stack.Screen
         name="Settings"
         component={SettingsScreen}
-        options={{ title: "Settings" }}
+        options={{ title: "Nustatymai" }}
       />
     </Stack.Navigator>
   );
@@ -123,7 +125,7 @@ export default function App() {
     <NavigationContainer>
       <Tab.Navigator screenOptions={{ headerShown: false }}>
         <Tab.Screen 
-          name="Categories" 
+          name="Kategorijos" 
           component={CategoriesStack} 
           options={{
             tabBarIcon: ({ color, size }) => (
@@ -132,7 +134,7 @@ export default function App() {
           }} 
         />
         <Tab.Screen 
-          name="Recommended" 
+          name="Rekomenduojami" 
           component={RecommendedStack}
           options={{
             tabBarIcon: ({ color, size }) => (

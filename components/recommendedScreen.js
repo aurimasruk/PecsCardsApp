@@ -1,33 +1,90 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, Modal } from 'react-native';
+import categoriesData from '../components/categoriesData'; 
+import { sendFeedback } from '../components/api';
+const API_URL = 'http://10.0.2.2:5000';
 
-const recommendedData = [
-  { id: 'r1', src: require('../assets/a.png'), description: 'Recommended Cat' },
-  { id: 'r2', src: require('../assets/b.png'), description: 'Recommended Dog' },
-  { id: 'r3', src: require('../assets/a.png'), description: 'Recommended Cat' },
-  { id: 'r4', src: require('../assets/b.png'), description: 'Recommended Dog' },
-  // Ensure you have these images in your assets directory
-];
+// const recommendedData = [
+//   { id: 'r1', src: require('../assets/a.png'), description: 'Recommended Cat' },
+//   { id: 'r2', src: require('../assets/b.png'), description: 'Recommended Dog' },
+//   { id: 'r3', src: require('../assets/a.png'), description: 'Recommended Cat' },
+//   { id: 'r4', src: require('../assets/b.png'), description: 'Recommended Dog' },
+// ];
+
+console.log(categoriesData);
+
 
 const RecommendedScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [imagesData, setImagesData] = useState([]);
+
+  useEffect(() => {
+    const loadScores = async () => {
+      const scoresJson = await AsyncStorage.getItem('scores');
+      const localScores = scoresJson ? JSON.parse(scoresJson) : {};
+      const updatedData = categoriesData
+        .flatMap(category => category.images.map(image => ({
+          ...image,
+          score: localScores[image.id] || image.score // Update score from local storage if available
+        })))
+        .filter(image => image.score > 0)
+        .sort((a, b) => b.score - a.score);
+      setImagesData(updatedData);
+    };
+  
+    loadScores();
+  }, []);
+
+  const loadData = async () => {
+    // Assuming you have some endpoint or method to fetch the latest scores
+    const updatedData = categoriesData
+    .flatMap(category => category.images
+    .filter(image => image.score > 0))
+    .sort((a, b) => b.score - a.score);
+    setImagesData(updatedData);
+  };
 
   const openImage = (image) => {
     setSelectedImage(image);
     setModalVisible(true);
   };
 
-  const handleFeedback = (score) => {
-    console.log(`Feedback for ${selectedImage ? selectedImage.description : 'unknown'}: ${score}`);
-    // Here you would typically update your backend or state with the feedback score
-    setModalVisible(false);
-  };
+  const recommendedData = (categoriesData)
+    .flatMap(category => category.images
+    .filter(image => image.score > 0))
+    .sort((a, b) => b.score - a.score); // Sort by score descending
+
+  const handleFeedback = async (score) => {
+  if (selectedImage) {
+    try {
+      // Update score in local storage
+      const scoresJson = await AsyncStorage.getItem('scores');
+      let scores = scoresJson ? JSON.parse(scoresJson) : {};
+      scores[selectedImage.id] = score; // Assume `selectedImage.id` is a unique identifier for images
+      await AsyncStorage.setItem('scores', JSON.stringify(scores));
+      console.log('Local score updated');
+
+      // Send feedback to the backend API
+      const response = await fetch(`${API_URL}/feedback`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageId: selectedImage.id, score })
+      });
+      const data = await response.json();
+      console.log('Feedback response:', data);
+    } catch (error) {
+      console.error('Error handling feedback:', error);
+    }
+    setModalVisible(false); // Close modal after handling feedback
+  }
+};
 
   return (
     <View style={styles.container}>
       <FlatList
-        data={recommendedData}
+        data={imagesData}
         keyExtractor={item => item.id}
         renderItem={({ item }) => (
           <TouchableOpacity 
@@ -48,23 +105,16 @@ const RecommendedScreen = () => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalView}>
             <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
-              <Text style={styles.closeText}>Close</Text>
+              <Text style={styles.closeText}>Uždaryti</Text> 
             </TouchableOpacity>
             {selectedImage && <Image source={selectedImage.src} style={styles.fullscreenImage} />}
             <Text style={styles.imageDescription}>{selectedImage ? selectedImage.description : ''}</Text>
             <View style={styles.smileyContainer}>
-              <TouchableOpacity onPress={() => handleFeedback(4)}>
-                <Image source={require('../assets/a.png')} style={styles.smileyIcon} />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => handleFeedback(3)}>
-                <Image source={require('../assets/b.png')} style={styles.smileyIcon} />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => handleFeedback(2)}>
-                <Image source={require('../assets/a.png')} style={styles.smileyIcon} />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => handleFeedback(1)}>
-                <Image source={require('../assets/b.png')} style={styles.smileyIcon} />
-              </TouchableOpacity>
+              {[4, 3, 2, 1].map(val => (
+                <TouchableOpacity key={val} onPress={() => handleFeedback(val)}>
+                  <Image source={require(`../assets/a1.png`)} style={styles.smileyIcon} />
+                </TouchableOpacity>
+              ))}
             </View>
           </View>
         </View>

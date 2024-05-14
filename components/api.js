@@ -1,11 +1,11 @@
 // api.js
 const API_URL = 'http://10.0.2.2:5000'; // actual API URL
 
-console.log("api.js is loaded");
+// console.log("api.js is loaded");
 
 export const sendFeedback = async (imageId, score) => {
     try {
-      const response = await fetch(`http://10.0.2.2:5000/feedback`, {
+      const response = await fetch(`${API_URL}/feedback`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

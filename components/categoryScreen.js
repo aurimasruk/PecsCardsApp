@@ -44,22 +44,22 @@ const CategoryScreen = ({ route }) => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalView}>
             <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
-              <Text style={styles.closeText}>Close</Text>
+              <Text style={styles.closeText}>Uždaryti</Text>
             </TouchableOpacity>
             {selectedImage && <Image source={selectedImage.src} style={styles.fullscreenImage} />}
             <Text style={styles.imageDescription}>{selectedImage ? selectedImage.description : ''}</Text>
             <View style={styles.smileyContainer}>
               <TouchableOpacity onPress={() => handleFeedback(4)}>
-                <Image source={require('../assets/a.png')} style={styles.smileyIcon} />
+                <Image source={require('../assets/very-happy.png')} style={styles.smileyIcon} />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => handleFeedback(3)}>
-                <Image source={require('../assets/b.png')} style={styles.smileyIcon} />
+                <Image source={require('../assets/happy.png')} style={styles.smileyIcon} />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => handleFeedback(2)}>
-                <Image source={require('../assets/a.png')} style={styles.smileyIcon} />
+                <Image source={require('../assets/neutral.png')} style={styles.smileyIcon} />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => handleFeedback(1)}>
-                <Image source={require('../assets/b.png')} style={styles.smileyIcon} />
+                <Image source={require('../assets/sad.png')} style={styles.smileyIcon} />
               </TouchableOpacity>
             </View>
           </View>
@@ -96,7 +96,9 @@ const styles = StyleSheet.create({
       marginTop: 10,
     },
     description: {
-      marginTop: 5,
+      fontSize: 25,
+      fontWeight: 'bold',
+      marginTop: 10,
       marginBottom: 10,
     },
     modalOverlay: {
