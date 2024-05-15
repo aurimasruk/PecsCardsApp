@@ -85,8 +85,14 @@ def feedback():
         else:
             state = next_state  # Continue to the next state
         
-        # Update scores to reflect the Q-table value
-        scores[image_id] = float(np.max(q_table[state]))  # Ensure the score is a float
+        # Calculate the adjusted score for the card
+        q_values = q_table[id_to_state[image_id]]
+        highest_q_value = np.max(q_values)
+        mean_q_value = np.mean(q_values)
+        normalized_score = (highest_q_value + mean_q_value) / 2  # Simple normalization
+        
+        scores[image_id] = float(normalized_score)
+        
         logging.debug(f"Scores: {scores}")
         with open('scores.json', 'w') as f:
             json.dump(scores, f)
