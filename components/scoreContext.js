@@ -1,4 +1,3 @@
-// ScoreContext.js
 import React, { createContext, useReducer, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -20,8 +19,6 @@ const scoreReducer = (state, action) => {
       return state;
   }
 };
-
-// const ScoreContext = createContext();
 
 export const ScoreProvider = ({ children }) => {
   const [state, dispatch] = useReducer(scoreReducer, initialState);
