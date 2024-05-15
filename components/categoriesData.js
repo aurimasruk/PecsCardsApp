@@ -6,7 +6,7 @@ export const categoriesData = [
         image: require('../assets/pets.png'),
         images: [
             { id: 'a1', src: require('../assets/images/animals/dog.png'), description: 'Šuo', score: 0 },
-            { id: 'a2', src: require('../assets/images/animals/cat.png'), description: 'Katė', score: 3 },
+            { id: 'a2', src: require('../assets/images/animals/cat.png'), description: 'Katė', score: 0 },
             { id: 'a3', src: require('../assets/images/animals/bird.png'), description: 'Paukštis', score: 0 },
             // { id: 'a4', src: require('../assets/images/cow.png'), description: 'Karvė', score: 0 },
         ],
@@ -16,7 +16,7 @@ export const categoriesData = [
         title: 'Maistas',
         image: require('../assets/food.png'),
         images: [
-            { id: 'f1', src: require('../assets/images/food/apple.png'), description: 'Obuolys', score: 2 },
+            { id: 'f1', src: require('../assets/images/food/apple.png'), description: 'Obuolys', score: 0 },
             { id: 'f2', src: require('../assets/images/food/banana.png'), description: 'Bananas', score: 0 },
             { id: 'f3', src: require('../assets/images/food/sandwich.png'), description: 'Sumuštinis', score: 0 },
             { id: 'f4', src: require('../assets/images/food/water-bottle.png'), description: 'Vanduo', score: 0 },

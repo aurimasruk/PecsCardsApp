@@ -22,14 +22,17 @@ exploration_decay_rate = 0.99
 logging.basicConfig(level=logging.DEBUG)
 
 # Load scores and mappings from a file
-if os.path.exists('scores.json'):
-    with open('scores.json', 'r') as f:
+scores_path = os.path.join(os.path.dirname(__file__), 'scores.json')
+id_to_state_path = os.path.join(os.path.dirname(__file__), 'id_to_state.json')
+
+if os.path.exists(scores_path):
+    with open(scores_path, 'r') as f:
         scores = json.load(f)
 else:
     scores = {}
 
-if os.path.exists('id_to_state.json'):
-    with open('id_to_state.json', 'r') as f:
+if os.path.exists(id_to_state_path):
+    with open(id_to_state_path, 'r') as f:
         id_to_state = json.load(f)
 else:
     id_to_state = {}
@@ -64,7 +67,7 @@ def feedback():
         # Map image_id to state
         if image_id not in id_to_state:
             id_to_state[image_id] = len(id_to_state)
-            with open('id_to_state.json', 'w') as f:
+            with open(id_to_state_path, 'w') as f:
                 json.dump(id_to_state, f)
         
         state = id_to_state[image_id]
@@ -94,7 +97,7 @@ def feedback():
         scores[image_id] = float(normalized_score)
         
         logging.debug(f"Scores: {scores}")
-        with open('scores.json', 'w') as f:
+        with open(scores_path, 'w') as f:
             json.dump(scores, f)
         
         # Emit the updated scores to all clients
@@ -107,7 +110,7 @@ def feedback():
 
 @app.route('/reset-environment', methods=['POST'])
 def reset_environment():
-    global state
+    global state, q_table
     state = env.reset()
     
     # Check if state is a tuple and extract the first element
@@ -116,8 +119,11 @@ def reset_environment():
     
     # Reset scores
     scores.clear()
-    with open('scores.json', 'w') as f:
+    with open(scores_path, 'w') as f:
         json.dump(scores, f)
+    
+    # Reset Q-table
+    q_table = np.zeros([env.observation_space.n, env.action_space.n])
     
     # Emit the reset scores to all clients
     socketio.emit('scores_updated', scores)
@@ -158,7 +164,7 @@ def run_automated_feedback():
             return jsonify({"error": "Failed to run automated feedback script", "details": result.stderr}), 500
         
         # Emit the updated scores to all clients
-        with open('scores.json', 'r') as f:
+        with open(scores_path, 'r') as f:
             scores = json.load(f)
         socketio.emit('scores_updated', scores)
         

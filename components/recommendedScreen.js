@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, Modal, Button } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { sendFeedback, getScores, resetEnvironment, runAutomatedFeedback } from '../components/api';
 import categoriesData from '../components/categoriesData';
 
@@ -22,9 +23,11 @@ const RecommendedScreen = () => {
     setImagesData(updatedData);
   };
 
-  useEffect(() => {
-    loadScores();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadScores();
+    }, [])
+  );
 
   const openImage = (image) => {
     setSelectedImage(image);
@@ -41,21 +44,18 @@ const RecommendedScreen = () => {
 
   const handleTestFeedback = async () => {
     try {
+      console.log(`Running automated feedback script`);
       const response = await runAutomatedFeedback();
-      console.log("Test feedback response:", response); // Debug log
+      console.log("Automated feedback response:", response); // Debug log
       loadScores();
     } catch (error) {
-      console.error('Error running automated feedback:', error);
+      console.error("Error during automated feedback:", error);
     }
   };
 
   const handleResetEnvironment = async () => {
-    try {
-      await resetEnvironment();
-      loadScores();
-    } catch (error) {
-      console.error('Error resetting environment:', error);
-    }
+    await resetEnvironment();
+    loadScores();
   };
 
   return (
@@ -84,7 +84,7 @@ const RecommendedScreen = () => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalView}>
             <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
-              <Text style={styles.closeText}>Close</Text>
+              <Text style={styles.closeText}>Close</Text> 
             </TouchableOpacity>
             {selectedImage && <Image source={selectedImage.src} style={styles.fullscreenImage} />}
             <Text style={styles.imageDescription}>{selectedImage ? selectedImage.description : ''}</Text>
