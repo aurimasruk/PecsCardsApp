@@ -89,11 +89,18 @@ const RecommendedScreen = () => {
             {selectedImage && <Image source={selectedImage.src} style={styles.fullscreenImage} />}
             <Text style={styles.imageDescription}>{selectedImage ? selectedImage.description : ''}</Text>
             <View style={styles.smileyContainer}>
-              {[4, 3, 2, 1].map(val => (
-                <TouchableOpacity key={val} onPress={() => handleFeedback(val)}>
-                  <Image source={require(`../assets/a1.png`)} style={styles.smileyIcon} />
-                </TouchableOpacity>
-              ))}
+              <TouchableOpacity onPress={() => handleFeedback(4)}>
+                <Image source={require('../assets/very-happy.png')} style={styles.smileyIcon} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleFeedback(3)}>
+                <Image source={require('../assets/happy.png')} style={styles.smileyIcon} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleFeedback(2)}>
+                <Image source={require('../assets/neutral.png')} style={styles.smileyIcon} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleFeedback(1)}>
+                <Image source={require('../assets/sad.png')} style={styles.smileyIcon} />
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -105,7 +112,7 @@ const RecommendedScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 0,
+    paddingHorizontal: 10,
   },
   list: {
     paddingHorizontal: 10,

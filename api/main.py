@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit
+from flask_cors import CORS
 import numpy as np
 import gym
 import json
@@ -8,6 +9,7 @@ import logging
 import subprocess
 
 app = Flask(__name__)
+CORS(app)
 socketio = SocketIO(app)
 
 # Initialize Frozen Lake environment
@@ -22,17 +24,14 @@ exploration_decay_rate = 0.99
 logging.basicConfig(level=logging.DEBUG)
 
 # Load scores and mappings from a file
-scores_path = os.path.join(os.path.dirname(__file__), 'scores.json')
-id_to_state_path = os.path.join(os.path.dirname(__file__), 'id_to_state.json')
-
-if os.path.exists(scores_path):
-    with open(scores_path, 'r') as f:
+if os.path.exists('scores.json'):
+    with open('scores.json', 'r') as f:
         scores = json.load(f)
 else:
     scores = {}
 
-if os.path.exists(id_to_state_path):
-    with open(id_to_state_path, 'r') as f:
+if os.path.exists('id_to_state.json'):
+    with open('id_to_state.json', 'r') as f:
         id_to_state = json.load(f)
 else:
     id_to_state = {}
@@ -67,7 +66,7 @@ def feedback():
         # Map image_id to state
         if image_id not in id_to_state:
             id_to_state[image_id] = len(id_to_state)
-            with open(id_to_state_path, 'w') as f:
+            with open('id_to_state.json', 'w') as f:
                 json.dump(id_to_state, f)
         
         state = id_to_state[image_id]
@@ -97,7 +96,7 @@ def feedback():
         scores[image_id] = float(normalized_score)
         
         logging.debug(f"Scores: {scores}")
-        with open(scores_path, 'w') as f:
+        with open('scores.json', 'w') as f:
             json.dump(scores, f)
         
         # Emit the updated scores to all clients
@@ -119,7 +118,7 @@ def reset_environment():
     
     # Reset scores
     scores.clear()
-    with open(scores_path, 'w') as f:
+    with open('scores.json', 'w') as f:
         json.dump(scores, f)
     
     # Reset Q-table
@@ -164,7 +163,7 @@ def run_automated_feedback():
             return jsonify({"error": "Failed to run automated feedback script", "details": result.stderr}), 500
         
         # Emit the updated scores to all clients
-        with open(scores_path, 'r') as f:
+        with open('scores.json', 'r') as f:
             scores = json.load(f)
         socketio.emit('scores_updated', scores)
         
