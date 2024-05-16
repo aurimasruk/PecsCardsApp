@@ -1,16 +1,14 @@
 import React from 'react';
-import { Button, FlatList, View, Image, TouchableOpacity, Text, StyleSheet, Modal } from 'react-native';
+import { FlatList, View, Image, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { categoriesData } from './components/categoriesData';
-// import styles from './components/styles';
 import CategoryScreen from './components/categoryScreen';
 import SettingsScreen from './components/settingsScreen';
 import Icon from 'react-native-vector-icons/Ionicons';
 import RecommendedScreen from './components/recommendedScreen';
-// import { sendFeedback } from './components/api';
-
+import { DeveloperModeProvider } from './components/DeveloperModeContext';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -20,8 +18,8 @@ function CategoriesScreen({ navigation }) {
     <FlatList
       data={categoriesData}
       renderItem={({ item }) => (
-        <TouchableOpacity 
-          style={styles.categoryContainer} 
+        <TouchableOpacity
+          style={styles.categoryContainer}
           onPress={() => navigation.navigate('Category', { category: item })}
         >
           <Image source={item.image} style={styles.image} />
@@ -29,7 +27,7 @@ function CategoriesScreen({ navigation }) {
         </TouchableOpacity>
       )}
       keyExtractor={(item) => item.id}
-      numColumns={1} // Single column layout
+      numColumns={1}
       contentContainerStyle={styles.list}
     />
   );
@@ -39,7 +37,7 @@ const styles = StyleSheet.create({
   list: {
     paddingHorizontal: 10,
     paddingBottom: 20,
-    paddingTop: 20
+    paddingTop: 20,
   },
   categoryContainer: {
     flex: 1,
@@ -55,20 +53,19 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   image: {
-    width: '100%', // Full width of the container
-    height: 300, // Adjusted height
-    resizeMode: 'contain',  // Changed from 'cover' to 'contain'
+    width: '100%',
+    height: 300,
+    resizeMode: 'contain',
     marginTop: 10,
   },
   text: {
     fontSize: 25,
-    // fontWeight: 'bold',
     padding: 10,
     marginBottom: 10,
-  }
+  },
 });
 
-function CategoriesStack(){
+function CategoriesStack() {
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -83,8 +80,8 @@ function CategoriesStack(){
           ),
         })}
       />
-      <Stack.Screen 
-        name="Category" 
+      <Stack.Screen
+        name="Category"
         component={CategoryScreen}
         options={({ route }) => ({ title: route.params.category.title })}
       />
@@ -122,27 +119,29 @@ function RecommendedStack() {
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <Tab.Navigator screenOptions={{ headerShown: false }}>
-        <Tab.Screen 
-          name="Kategorijos" 
-          component={CategoriesStack} 
-          options={{
-            tabBarIcon: ({ color, size }) => (
-              <Icon name="list" color={color} size={size} />
-            ),
-          }} 
-        />
-        <Tab.Screen 
-          name="Rekomenduojami" 
-          component={RecommendedStack}
-          options={{
-            tabBarIcon: ({ color, size }) => (
-              <Icon name="star" color={color} size={size} />
-            ),
-          }}
-        />
-      </Tab.Navigator>
-    </NavigationContainer>
+    <DeveloperModeProvider>
+      <NavigationContainer>
+        <Tab.Navigator screenOptions={{ headerShown: false }}>
+          <Tab.Screen
+            name="Kategorijos"
+            component={CategoriesStack}
+            options={{
+              tabBarIcon: ({ color, size }) => (
+                <Icon name="list" color={color} size={size} />
+              ),
+            }}
+          />
+          <Tab.Screen
+            name="Rekomenduojami"
+            component={RecommendedStack}
+            options={{
+              tabBarIcon: ({ color, size }) => (
+                <Icon name="star" color={color} size={size} />
+              ),
+            }}
+          />
+        </Tab.Navigator>
+      </NavigationContainer>
+    </DeveloperModeProvider>
   );
 }

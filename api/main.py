@@ -9,7 +9,7 @@ import logging
 import subprocess
 
 app = Flask(__name__)
-CORS(app)
+# CORS(app)
 socketio = SocketIO(app)
 
 # Initialize Frozen Lake environment
@@ -24,14 +24,17 @@ exploration_decay_rate = 0.99
 logging.basicConfig(level=logging.DEBUG)
 
 # Load scores and mappings from a file
-if os.path.exists('scores.json'):
-    with open('scores.json', 'r') as f:
+scores_path = os.path.join(os.path.dirname(__file__), 'scores.json')
+id_to_state_path = os.path.join(os.path.dirname(__file__), 'id_to_state.json')
+
+if os.path.exists(scores_path):
+    with open(scores_path, 'r') as f:
         scores = json.load(f)
 else:
     scores = {}
 
-if os.path.exists('id_to_state.json'):
-    with open('id_to_state.json', 'r') as f:
+if os.path.exists(id_to_state_path):
+    with open(id_to_state_path, 'r') as f:
         id_to_state = json.load(f)
 else:
     id_to_state = {}
@@ -118,7 +121,7 @@ def reset_environment():
     
     # Reset scores
     scores.clear()
-    with open('scores.json', 'w') as f:
+    with open(scores_path, 'w') as f:
         json.dump(scores, f)
     
     # Reset Q-table
@@ -163,7 +166,7 @@ def run_automated_feedback():
             return jsonify({"error": "Failed to run automated feedback script", "details": result.stderr}), 500
         
         # Emit the updated scores to all clients
-        with open('scores.json', 'r') as f:
+        with open(scores_path, 'r') as f:
             scores = json.load(f)
         socketio.emit('scores_updated', scores)
         

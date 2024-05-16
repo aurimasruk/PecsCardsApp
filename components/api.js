@@ -1,43 +1,54 @@
 import axios from 'axios';
 
-const apiUrl = 'http://10.0.2.2:5000';
+const axiosInstance = axios.create({
+  baseURL: 'http://10.0.2.2:5000',
+  timeout: 10000, // 10 seconds timeout
+});
 
-export const sendFeedback = async (imageId, score) => {
+export const getScores = async () => {
   try {
-    const response = await axios.post(`${apiUrl}/feedback`, { imageId, score });
+    console.log('Sending request to get scores');
+    const response = await axiosInstance.get('/get-scores');
+    console.log('Received scores:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Error in sendFeedback:', error);
+    console.error('Error fetching scores:', error);
     throw error;
   }
 };
 
-export const getScores = async () => {
+export const sendFeedback = async (imageId, score) => {
   try {
-    const response = await axios.get(`${apiUrl}/get-scores`);
+    console.log(`Sending feedback for imageId: ${imageId}, score: ${score}`);
+    const response = await axiosInstance.post('/feedback', { imageId, score });
+    console.log('Feedback response:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Error in getScores:', error);
+    console.error('Error sending feedback:', error);
     throw error;
   }
 };
 
 export const resetEnvironment = async () => {
   try {
-    const response = await axios.post(`${apiUrl}/reset-environment`);
+    console.log('Sending request to reset environment');
+    const response = await axiosInstance.post('/reset-environment');
+    console.log('Reset environment response:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Error in resetEnvironment:', error);
+    console.error('Error resetting environment:', error);
     throw error;
   }
 };
 
 export const runAutomatedFeedback = async () => {
   try {
-    const response = await axios.post(`${apiUrl}/run-automated-feedback`);
+    console.log('Sending request to run automated feedback');
+    const response = await axiosInstance.post('/run-automated-feedback');
+    console.log('Automated feedback response:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Error in runAutomatedFeedback:', error.toJSON ? error.toJSON() : error);
+    console.error('Error running automated feedback:', error);
     throw error;
   }
 };

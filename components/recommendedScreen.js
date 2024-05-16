@@ -1,26 +1,35 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useContext } from 'react';
 import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, Modal, Button } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { sendFeedback, getScores, resetEnvironment, runAutomatedFeedback } from '../components/api';
 import categoriesData from '../components/categoriesData';
+import { DeveloperModeContext } from '../components/DeveloperModeContext';
 
 const RecommendedScreen = () => {
+  const { isDeveloperMode } = useContext(DeveloperModeContext);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagesData, setImagesData] = useState([]);
 
   const loadScores = async () => {
-    const scores = await getScores();
-    console.log("Fetched scores:", scores); // Debug log
-    const updatedData = categoriesData
-      .flatMap(category => category.images.map(image => ({
-        ...image,
-        score: scores[image.id] || 0
-      })))
-      .filter(image => image.score > 0)
-      .sort((a, b) => b.score - a.score);
-    console.log("Updated data:", updatedData); // Debug log
-    setImagesData(updatedData);
+    try {
+      console.log('Fetching scores...');
+      const scores = await getScores();
+      console.log('Fetched scores:', scores);
+
+      const updatedData = categoriesData
+        .flatMap(category => category.images.map(image => ({
+          ...image,
+          score: scores[image.id] || 0
+        })))
+        .filter(image => image.score > 0)
+        .sort((a, b) => b.score - a.score);
+
+      console.log('Updated data:', updatedData);
+      setImagesData(updatedData);
+    } catch (error) {
+      console.error('Error loading scores:', error);
+    }
   };
 
   useFocusEffect(
@@ -36,26 +45,38 @@ const RecommendedScreen = () => {
 
   const handleFeedback = async (score) => {
     if (selectedImage) {
-      await sendFeedback(selectedImage.id, score);
-      setModalVisible(false);
-      loadScores();
+      try {
+        console.log(`Sending feedback for imageId: ${selectedImage.id}, score: ${score}`);
+        await sendFeedback(selectedImage.id, score);
+        console.log('Feedback sent successfully');
+        setModalVisible(false);
+        loadScores();
+      } catch (error) {
+        console.error('Error sending feedback:', error);
+      }
     }
   };
 
   const handleTestFeedback = async () => {
     try {
-      console.log(`Running automated feedback script`);
-      const response = await runAutomatedFeedback();
-      console.log("Automated feedback response:", response); // Debug log
+      console.log('Running automated feedback script');
+      await runAutomatedFeedback();
+      console.log('Automated feedback executed successfully');
       loadScores();
     } catch (error) {
-      console.error("Error during automated feedback:", error);
+      console.error('Error during automated feedback:', error);
     }
   };
 
   const handleResetEnvironment = async () => {
-    await resetEnvironment();
-    loadScores();
+    try {
+      console.log('Resetting environment');
+      await resetEnvironment();
+      console.log('Environment reset successfully');
+      loadScores();
+    } catch (error) {
+      console.error('Error resetting environment:', error);
+    }
   };
 
   return (
@@ -73,8 +94,12 @@ const RecommendedScreen = () => {
           </TouchableOpacity>
         )}
       />
-      <Button title="Reset Environment" onPress={handleResetEnvironment} />
-      <Button title="Test Feedback" onPress={handleTestFeedback} />
+      {isDeveloperMode && (
+        <View style={styles.devButtonsContainer}>
+          <Button title="Reset Environment" onPress={handleResetEnvironment} />
+          <Button title="Test Feedback" onPress={handleTestFeedback} />
+        </View>
+      )}
       <Modal
         animationType="fade"
         transparent={true}
@@ -91,7 +116,7 @@ const RecommendedScreen = () => {
             <View style={styles.smileyContainer}>
               <TouchableOpacity onPress={() => handleFeedback(4)}>
                 <Image source={require('../assets/very-happy.png')} style={styles.smileyIcon} />
-              </TouchableOpacity>
+                </TouchableOpacity>
               <TouchableOpacity onPress={() => handleFeedback(3)}>
                 <Image source={require('../assets/happy.png')} style={styles.smileyIcon} />
               </TouchableOpacity>
@@ -189,6 +214,11 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     resizeMode: 'contain',
+  },
+  devButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    margin: 10,
   },
 });
 
