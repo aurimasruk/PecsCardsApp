@@ -78,4 +78,3 @@
 //     resizeMode: 'contain',
 //   },
 // });
-

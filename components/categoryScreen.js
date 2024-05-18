@@ -75,13 +75,13 @@ const styles = StyleSheet.create({
       alignItems: 'center',
     },
     imageContainer: {
-      width: '100%', // Ensures that the image container takes full width
+      width: '100%', // Image container takes full width
       alignItems: 'center',
       marginBottom: 10,
-      backgroundColor: '#fff', // Background color for the container
-      borderRadius: 10, // Rounded corners for the container
-      borderWidth: 2, // Width of the border
-      borderColor: '#ddd', // Color of the border
+      backgroundColor: '#fff',
+      borderRadius: 10, // Rounded corners
+      borderWidth: 2,
+      borderColor: '#ddd',
       overflow: 'hidden',
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     },
     image: {
       width: '100%', // Full width of the container
-      height: 300, // Specified height
+      height: 300,
       resizeMode: 'contain',
       marginTop: 10,
     },
@@ -117,12 +117,12 @@ const styles = StyleSheet.create({
       shadowOpacity: 0.25,
       shadowRadius: 4,
       elevation: 5,
-      width: '80%', // Adjust the modal width here
-      maxWidth: 600 // Ensures modal doesn't get too wide on large screens
+      width: '80%',
+      maxWidth: 600
     },
     fullscreenImage: {
       width: '100%',
-      height: 300, // Adjust according to your needs
+      height: 300,
       resizeMode: 'contain'
     },
     closeButton: {
@@ -153,5 +153,4 @@ const styles = StyleSheet.create({
     },
   });
   
-
 export default CategoryScreen;

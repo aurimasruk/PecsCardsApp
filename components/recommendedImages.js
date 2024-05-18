@@ -1,7 +1,7 @@
 // RecommendedImages.js
 import React, { useContext } from 'react';
 import { ScoreContext } from './components/scoreContext';
-import { categoriesData } from './components/categoriesData'; // make sure the path is correct
+import { categoriesData } from './components/categoriesData';
 
 const RecommendedImages = () => {
   const { state } = useContext(ScoreContext);

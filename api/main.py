@@ -50,7 +50,7 @@ def update_q_table(state, action, reward, next_state, done):
     td_error = td_target - q_table[state, action]
     q_table[state, action] += learning_rate * td_error
     logging.debug(f"State: {state}, Action: {action}, Reward: {reward}, Next State: {next_state}, Done: {done}")
-    logging.debug(f"Updated Q-table: {q_table}")
+    # logging.debug(f"Updated Q-table: {q_table}")  # Logging Q-table
 
 @app.route('/feedback', methods=['POST'])
 def feedback():
@@ -98,7 +98,7 @@ def feedback():
         
         scores[image_id] = float(normalized_score)
         
-        logging.debug(f"Scores: {scores}")
+        # logging.debug(f"Scores: {scores}")  # Logging scores
         with open('scores.json', 'w') as f:
             json.dump(scores, f)
         
@@ -154,10 +154,9 @@ def test_feedback():
 @app.route('/run-automated-feedback', methods=['POST'])
 def run_automated_feedback():
     try:
-        # Path to your automated_feedback.py script
+        # Path to automated_feedback.py script
         script_path = os.path.join(os.path.dirname(__file__), 'automated_feedback.py')
         
-        # Run the script
         result = subprocess.run(['python', script_path], capture_output=True, text=True)
         
         # Check if the script ran successfully

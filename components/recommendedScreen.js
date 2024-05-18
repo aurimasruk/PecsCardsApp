@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useContext } from 'react';
-import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, Modal, Button } from 'react-native';
+import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, Modal, Button, ActivityIndicator } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { sendFeedback, getScores, resetEnvironment, runAutomatedFeedback } from '../components/api';
 import categoriesData from '../components/categoriesData';
@@ -10,12 +10,15 @@ const RecommendedScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagesData, setImagesData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
 
   const loadScores = async () => {
+    setLoading(true);
     try {
       console.log('Fetching scores...');
       const scores = await getScores();
-      console.log('Fetched scores:', scores);
+      // console.log('Fetched scores:', scores);  # Logging for score fetching
 
       const updatedData = categoriesData
         .flatMap(category => category.images.map(image => ({
@@ -25,10 +28,12 @@ const RecommendedScreen = () => {
         .filter(image => image.score > 0)
         .sort((a, b) => b.score - a.score);
 
-      console.log('Updated data:', updatedData);
+      // console.log('Updated data:', updatedData);
       setImagesData(updatedData);
     } catch (error) {
       console.error('Error loading scores:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -58,13 +63,20 @@ const RecommendedScreen = () => {
   };
 
   const handleTestFeedback = async () => {
+    setFeedbackLoading(true);
     try {
       console.log('Running automated feedback script');
       await runAutomatedFeedback();
       console.log('Automated feedback executed successfully');
-      loadScores();
     } catch (error) {
       console.error('Error during automated feedback:', error);
+    } finally {
+      // Add a delay before fetching scores
+      setTimeout(async () => {
+        console.log('Fetching scores after delay');
+        await loadScores();
+        setFeedbackLoading(false);
+      }, 1000); // delay
     }
   };
 
@@ -81,23 +93,27 @@ const RecommendedScreen = () => {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={imagesData}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <TouchableOpacity 
-            style={styles.card}
-            onPress={() => openImage(item)}
-          >
-            <Image source={item.src} style={styles.image} />
-            <Text style={styles.text}>{item.description}</Text>
-          </TouchableOpacity>
-        )}
-      />
+      {loading || feedbackLoading ? (
+        <ActivityIndicator size="large" color="#0000ff" style={styles.loadingIndicator} />
+      ) : (
+        <FlatList
+          data={imagesData}
+          keyExtractor={item => item.id}
+          renderItem={({ item }) => (
+            <TouchableOpacity 
+              style={styles.card}
+              onPress={() => openImage(item)}
+            >
+              <Image source={item.src} style={styles.image} />
+              <Text style={styles.text}>{item.description}</Text>
+            </TouchableOpacity>
+          )}
+        />
+      )}
       {isDeveloperMode && (
         <View style={styles.devButtonsContainer}>
           <Button title="Reset Environment" onPress={handleResetEnvironment} />
-          <Button title="Test Feedback" onPress={handleTestFeedback} />
+          <Button title="Test Feedback" onPress={handleTestFeedback} disabled={feedbackLoading} />
         </View>
       )}
       <Modal
@@ -116,7 +132,7 @@ const RecommendedScreen = () => {
             <View style={styles.smileyContainer}>
               <TouchableOpacity onPress={() => handleFeedback(4)}>
                 <Image source={require('../assets/very-happy.png')} style={styles.smileyIcon} />
-                </TouchableOpacity>
+              </TouchableOpacity>
               <TouchableOpacity onPress={() => handleFeedback(3)}>
                 <Image source={require('../assets/happy.png')} style={styles.smileyIcon} />
               </TouchableOpacity>
@@ -219,6 +235,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     margin: 10,
+  },
+  loadingIndicator: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

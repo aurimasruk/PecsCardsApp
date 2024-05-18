@@ -2,14 +2,14 @@ import axios from 'axios';
 
 const axiosInstance = axios.create({
   baseURL: 'http://10.0.2.2:5000',
-  timeout: 10000, // 10 seconds timeout
+  timeout: 30000, // 30 seconds timeout
 });
 
 export const getScores = async () => {
   try {
     console.log('Sending request to get scores');
     const response = await axiosInstance.get('/get-scores');
-    console.log('Received scores:', response.data);
+    // console.log('Received scores:', response.data);  # Logging for received scores
     return response.data;
   } catch (error) {
     console.error('Error fetching scores:', error);
