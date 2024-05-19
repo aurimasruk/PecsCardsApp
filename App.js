@@ -3,20 +3,48 @@ import { FlatList, View, Image, TouchableOpacity, Text, StyleSheet } from 'react
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { categoriesData } from './components/categoriesData';
+import categoriesData from './components/categoriesData';
 import CategoryScreen from './components/categoryScreen';
 import SettingsScreen from './components/settingsScreen';
 import Icon from 'react-native-vector-icons/Ionicons';
 import RecommendedScreen from './components/recommendedScreen';
 import { DeveloperModeProvider } from './components/DeveloperModeContext';
+import { ScoreProvider } from './components/scoreContext';
+import SessionRecommendedScreen from './components/sessionRecommendedScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-function CategoriesScreen({ navigation }) {
+function CategoriesScreen({ navigation, route }) {
+  const [visibleCategories, setVisibleCategories] = React.useState(categoriesData);
+
+  React.useEffect(() => {
+    if (route.params?.hideCategory) {
+      const hiddenCategoryId = route.params.hideCategory;
+      const newVisibleCategories = categoriesData.filter(
+        category => category.id !== hiddenCategoryId && !category.similarCategories.includes(hiddenCategoryId)
+      );
+      setVisibleCategories(newVisibleCategories);
+    } else if (route.params?.hideOpposite) {
+      const oppositeCategories = route.params.hideOpposite;
+      const newVisibleCategories = categoriesData.filter(
+        category => !oppositeCategories.includes(category.id)
+      );
+      setVisibleCategories(newVisibleCategories);
+    } else if (route.params?.showSimilar) {
+      const similarCategories = route.params.showSimilar;
+      const newVisibleCategories = categoriesData.filter(
+        category => similarCategories.includes(category.id) || category.id === route.params.currentCategoryId
+      );
+      setVisibleCategories(newVisibleCategories);
+    } else if (route.params?.resetCategories) {
+      setVisibleCategories(categoriesData);
+    }
+  }, [route.params]);
+
   return (
     <FlatList
-      data={categoriesData}
+      data={visibleCategories}
       renderItem={({ item }) => (
         <TouchableOpacity
           style={styles.categoryContainer}
@@ -101,6 +129,31 @@ function RecommendedStack() {
         name="Rekomenduojami"
         component={RecommendedScreen}
         options={({ navigation }) => ({
+          title: "Labiausiai naudojami",
+          headerRight: () => (
+            <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
+              <Icon name="settings-outline" size={25} color="#000" />
+            </TouchableOpacity>
+          ),
+        })}
+      />
+      <Stack.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{ title: "Nustatymai" }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function SessionRecommendedStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="SessionRecommended"
+        component={SessionRecommendedScreen}
+        options={({ navigation }) => ({
+          title: "Rekomenduojami",
           headerRight: () => (
             <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
               <Icon name="settings-outline" size={25} color="#000" />
@@ -120,6 +173,7 @@ function RecommendedStack() {
 export default function App() {
   return (
     <DeveloperModeProvider>
+      <ScoreProvider>
       <NavigationContainer>
         <Tab.Navigator screenOptions={{ headerShown: false }}>
           <Tab.Screen
@@ -132,7 +186,7 @@ export default function App() {
             }}
           />
           <Tab.Screen
-            name="Rekomenduojami"
+              name="Labiausiai naudojami"
             component={RecommendedStack}
             options={{
               tabBarIcon: ({ color, size }) => (
@@ -140,8 +194,18 @@ export default function App() {
               ),
             }}
           />
+            <Tab.Screen
+              name="Rekomenduojami"
+              component={SessionRecommendedStack}
+              options={{
+                tabBarIcon: ({ color, size }) => (
+                  <Icon name="time" color={color} size={size} />
+              ),
+            }}
+          />
         </Tab.Navigator>
       </NavigationContainer>
+      </ScoreProvider>
     </DeveloperModeProvider>
   );
 }

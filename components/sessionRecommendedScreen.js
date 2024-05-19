@@ -1,25 +1,22 @@
 import React, { useEffect, useState, useCallback, useContext } from 'react';
 import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, Modal, Button, ActivityIndicator } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
-import { sendFeedback, getScores, resetEnvironment, runAutomatedFeedback } from '../components/api';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { sendFeedback, getSessionScores, resetSessionEnvironment } from '../components/api';
 import categoriesData from '../components/categoriesData';
 import { DeveloperModeContext } from '../components/DeveloperModeContext';
 
-const RecommendedScreen = () => {
+const SessionRecommendedScreen = () => {
   const { isDeveloperMode } = useContext(DeveloperModeContext);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagesData, setImagesData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const navigation = useNavigation();
 
   const loadScores = async () => {
     setLoading(true);
     try {
-      console.log('Fetching scores...');
-      const scores = await getScores();
-      // console.log('Fetched scores:', scores);  # Logging for score fetching
-
+      const scores = await getSessionScores();
       const updatedData = categoriesData
         .flatMap(category => category.images.map(image => ({
           ...image,
@@ -28,7 +25,6 @@ const RecommendedScreen = () => {
         .filter(image => image.score > 0)
         .sort((a, b) => b.score - a.score);
 
-      // console.log('Updated data:', updatedData);
       setImagesData(updatedData);
     } catch (error) {
       console.error('Error loading scores:', error);
@@ -43,6 +39,14 @@ const RecommendedScreen = () => {
     }, [])
   );
 
+  useEffect(() => {
+    const resetEnvironmentOnStart = async () => {
+      console.log('Resetting session environment on start');
+      await resetSessionEnvironment();
+    };
+    resetEnvironmentOnStart();
+  }, []);
+
   const openImage = (image) => {
     setSelectedImage(image);
     setModalVisible(true);
@@ -51,9 +55,7 @@ const RecommendedScreen = () => {
   const handleFeedback = async (score) => {
     if (selectedImage) {
       try {
-        console.log(`Sending feedback for imageId: ${selectedImage.id}, score: ${score}`);
         await sendFeedback(selectedImage.id, score);
-        console.log('Feedback sent successfully');
         setModalVisible(false);
         loadScores();
       } catch (error) {
@@ -62,30 +64,12 @@ const RecommendedScreen = () => {
     }
   };
 
-  const handleTestFeedback = async () => {
-    setFeedbackLoading(true);
-    try {
-      console.log('Running automated feedback script');
-      await runAutomatedFeedback();
-      console.log('Automated feedback executed successfully');
-    } catch (error) {
-      console.error('Error during automated feedback:', error);
-    } finally {
-      // Add a delay before fetching scores
-      setTimeout(async () => {
-        console.log('Fetching scores after delay');
-        await loadScores();
-        setFeedbackLoading(false);
-      }, 1000); // delay
-    }
-  };
-
   const handleResetEnvironment = async () => {
     try {
-      console.log('Resetting environment');
-      await resetEnvironment();
-      console.log('Environment reset successfully');
+      console.log('Resetting session environment');
+      await resetSessionEnvironment();
       loadScores();
+      navigation.navigate('Categories', { resetCategories: true }); // Reset categories
     } catch (error) {
       console.error('Error resetting environment:', error);
     }
@@ -93,7 +77,7 @@ const RecommendedScreen = () => {
 
   return (
     <View style={styles.container}>
-      {loading || feedbackLoading ? (
+      {loading ? (
         <ActivityIndicator size="large" color="#0000ff" style={styles.loadingIndicator} />
       ) : (
         <FlatList
@@ -112,8 +96,7 @@ const RecommendedScreen = () => {
       )}
       {isDeveloperMode && (
         <View style={styles.devButtonsContainer}>
-          <Button title="Reset Environment" onPress={handleResetEnvironment} />
-          <Button title="Test Feedback" onPress={handleTestFeedback} disabled={feedbackLoading} />
+          <Button title="Reset session Environment" onPress={handleResetEnvironment} />
         </View>
       )}
       <Modal
@@ -125,7 +108,7 @@ const RecommendedScreen = () => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalView}>
             <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
-              <Text style={styles.closeText}>Uždaryti</Text> 
+              <Text style={styles.closeText}>Uždaryti</Text>
             </TouchableOpacity>
             {selectedImage && <Image source={selectedImage.src} style={styles.fullscreenImage} />}
             <Text style={styles.imageDescription}>{selectedImage ? selectedImage.description : ''}</Text>
@@ -153,9 +136,6 @@ const RecommendedScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 10,
-  },
-  list: {
     paddingHorizontal: 10,
   },
   card: {
@@ -243,4 +223,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RecommendedScreen;
+export default SessionRecommendedScreen;

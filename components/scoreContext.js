@@ -1,7 +1,7 @@
 import React, { createContext, useReducer, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const ScoreContext = React.createContext(null);
+const ScoreContext = createContext(null);
 
 const initialState = {
   scores: {}
@@ -39,3 +39,5 @@ export const ScoreProvider = ({ children }) => {
     </ScoreContext.Provider>
   );
 };
+
+export { ScoreContext };

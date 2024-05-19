@@ -15,6 +15,7 @@ socketio = SocketIO(app)
 # Initialize Frozen Lake environment
 env = gym.make('FrozenLake8x8-v1')
 q_table = np.zeros([env.observation_space.n, env.action_space.n])
+session_q_table = np.zeros([env.observation_space.n, env.action_space.n])
 learning_rate = 0.1
 discount_factor = 0.99
 exploration_rate = 1.0
@@ -26,6 +27,7 @@ logging.basicConfig(level=logging.DEBUG)
 # Load scores and mappings from a file
 scores_path = os.path.join(os.path.dirname(__file__), 'scores.json')
 id_to_state_path = os.path.join(os.path.dirname(__file__), 'id_to_state.json')
+session_scores_path = os.path.join(os.path.dirname(__file__), 'session_scores.json')
 
 if os.path.exists(scores_path):
     with open(scores_path, 'r') as f:
@@ -44,7 +46,12 @@ state = env.reset()
 if isinstance(state, tuple):
     state = state[0]
 
-def update_q_table(state, action, reward, next_state, done):
+# Clear session scores at startup
+session_scores = {}
+with open(session_scores_path, 'w') as f:
+    json.dump(session_scores, f)
+
+def update_q_table(q_table, state, action, reward, next_state, done):
     best_next_action = np.argmax(q_table[next_state])
     td_target = reward + (discount_factor * q_table[next_state, best_next_action] * (not done))
     td_error = td_target - q_table[state, action]
@@ -81,7 +88,8 @@ def feedback():
         next_state, env_reward, done, truncated, info = env.step(action)
         logging.debug(f"After env.step - Next State: {next_state}, Env Reward: {env_reward}, Done: {done}")
         
-        update_q_table(state, action, reward, next_state, done)
+        update_q_table(q_table, state, action, reward, next_state, done)
+        update_q_table(session_q_table, state, action, reward, next_state, done)
         
         if done or truncated:
             state = env.reset()
@@ -97,10 +105,13 @@ def feedback():
         normalized_score = (highest_q_value + mean_q_value) / 2  # Simple normalization
         
         scores[image_id] = float(normalized_score)
+        session_scores[image_id] = float(normalized_score)
         
         # logging.debug(f"Scores: {scores}")  # Logging scores
         with open('scores.json', 'w') as f:
             json.dump(scores, f)
+        with open('session_scores.json', 'w') as f:
+            json.dump(session_scores, f)
         
         # Emit the updated scores to all clients
         socketio.emit('scores_updated', scores)
@@ -127,10 +138,34 @@ def reset_environment():
     # Reset Q-table
     q_table = np.zeros([env.observation_space.n, env.action_space.n])
     
+    reset_session_environment()
+    
     # Emit the reset scores to all clients
     socketio.emit('scores_updated', scores)
     
     return jsonify({"message": "Environment reset", "state": int(state)})
+
+@app.route('/reset-session-environment', methods=['POST'])
+def reset_session_environment():
+    global state, session_q_table, session_scores
+    state = env.reset()
+    
+    # Check if state is a tuple and extract the first element
+    if isinstance(state, tuple):
+        state = state[0]
+    
+    # Reset session scores
+    session_scores.clear()
+    with open(session_scores_path, 'w') as f:
+        json.dump(session_scores, f)
+    
+    # Reset session Q-table
+    session_q_table = np.zeros([env.observation_space.n, env.action_space.n])
+    
+    # Emit the reset scores to all clients
+    socketio.emit('scores_updated', session_scores)
+    
+    return jsonify({"message": "Session environment reset", "state": int(state)})
 
 @app.route('/test-feedback', methods=['POST'])
 def test_feedback():
@@ -177,6 +212,10 @@ def run_automated_feedback():
 @app.route('/get-scores', methods=['GET'])
 def get_scores():
     return jsonify(scores)
+
+@app.route('/session-scores', methods=['GET'])
+def get_session_scores():
+    return jsonify(session_scores)
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)

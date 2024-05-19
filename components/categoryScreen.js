@@ -1,33 +1,45 @@
-import React, { useState, useContext } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
-// import styles from './components/styles';
-import { sendFeedback } from '../components/api'; // Import the sendFeedback function
-// import ScoreContext from '../components/scoreContext'; 
-
+import React, { useState, useEffect } from 'react';
+import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
+import { sendFeedback } from '../components/api';
+import { useNavigation } from '@react-navigation/native';
+import categoriesData from '../components/categoriesData';
 
 const CategoryScreen = ({ route }) => {
   const { category } = route.params;
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const navigation = useNavigation();
+  const [currentCategory, setCurrentCategory] = useState(category);
 
-  // const { dispatch } = useContext(ScoreContext);
+  useEffect(() => {
+    setCurrentCategory(category);
+  }, [category]);
 
   const openImage = (image) => {
     setSelectedImage(image);
     setModalVisible(true);
   };
 
-  const handleFeedback = (score) => {
+  const handleFeedback = async (score) => {
     if (selectedImage) {
-      sendFeedback(selectedImage.id, score);  // Send feedback to server
-      // dispatch({ type: 'UPDATE_SCORE', id: selectedImage.id, score: score }); // Update local score
+      await sendFeedback(selectedImage.id, score); // Send feedback to server
+
+      if (score === 1) { // 1 - Hide current and similar categories
+        navigation.navigate('Categories', { hideCategory: currentCategory.id });
+      } else if (score === 2) { // 2 - Hide opposite categories
+        navigation.navigate('Categories', { hideOpposite: currentCategory.oppositeCategories });
+      } else if (score === 3) { // 3 - Show similar categories and the current category
+        navigation.navigate('Categories', { showSimilar: currentCategory.similarCategories, currentCategoryId: currentCategory.id });
+      } else if (score === 4) { // 4 - Correct choice - show (reset) all categories
+        navigation.navigate('Categories', { resetCategories: true });
+      }
     }
     setModalVisible(false);
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {category.images.map((image, index) => (
+      {currentCategory.images.map((image, index) => (
         <TouchableOpacity key={index} onPress={() => openImage(image)} style={styles.imageContainer}>
           <Image source={image.src} style={styles.image} />
           <Text style={styles.description}>{image.description}</Text>
@@ -75,11 +87,11 @@ const styles = StyleSheet.create({
       alignItems: 'center',
     },
     imageContainer: {
-      width: '100%', // Image container takes full width
+    width: '100%',
       alignItems: 'center',
       marginBottom: 10,
       backgroundColor: '#fff',
-      borderRadius: 10, // Rounded corners
+    borderRadius: 10,
       borderWidth: 2,
       borderColor: '#ddd',
       overflow: 'hidden',
@@ -90,7 +102,7 @@ const styles = StyleSheet.create({
       elevation: 2,
     },
     image: {
-      width: '100%', // Full width of the container
+    width: '100%',
       height: 300,
       resizeMode: 'contain',
       marginTop: 10,
@@ -118,12 +130,12 @@ const styles = StyleSheet.create({
       shadowRadius: 4,
       elevation: 5,
       width: '80%',
-      maxWidth: 600
+    maxWidth: 600,
     },
     fullscreenImage: {
       width: '100%',
       height: 300,
-      resizeMode: 'contain'
+    resizeMode: 'contain',
     },
     closeButton: {
       position: 'absolute',
