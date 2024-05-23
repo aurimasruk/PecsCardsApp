@@ -18,7 +18,7 @@ const Tab = createBottomTabNavigator();
 function CategoriesScreen({ navigation, route }) {
   const [visibleCategories, setVisibleCategories] = React.useState(categoriesData);
 
-  React.useEffect(() => {
+  React.useEffect(() => {     // Filtering
     if (route.params?.hideCategory) {
       const hiddenCategoryId = route.params.hideCategory;
       const newVisibleCategories = categoriesData.filter(

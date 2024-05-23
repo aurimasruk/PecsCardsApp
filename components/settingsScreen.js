@@ -9,8 +9,8 @@ const SettingsScreen = () => {
     setDeveloperMode(!isDeveloperMode);
   };
 
-  const appName = 'Šnekučiai'; // App name
-  const appVersion = '1.0.0'; // Version number
+  const appName = 'Šnekučiai';  // App name
+  const appVersion = '1.0.0';   // Version number
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -18,7 +18,7 @@ const SettingsScreen = () => {
         <Text style={styles.settingText}>Kūrėjo režimas</Text>
         <Switch value={isDeveloperMode} onValueChange={toggleDeveloperMode} />
       </View>
-      {/* Add other settings here */}
+      {/* Additional settings for future */}
       <View style={styles.footer}>
         <Text style={styles.footerText}>{appName}</Text>
         <Text style={styles.footerText}>Versija {appVersion}</Text>

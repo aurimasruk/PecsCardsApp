@@ -3,8 +3,8 @@ export const categoriesData = [
         id: 'animals',
         title: 'Gyvūnai',
         image: require('../assets/pets.png'),
-        similarCategories: ['foods', 'activities'],
-        oppositeCategories: ['emotions', 'people'],
+        similarCategories: ['people', 'emotions'],
+        oppositeCategories: ['numbers', 'shapes'],
         images: [
             { id: 'a1', src: require('../assets/images/animals/dog.png'), description: 'Šuo', score: 0 },
             { id: 'a2', src: require('../assets/images/animals/cat.png'), description: 'Katė', score: 0 },
@@ -15,8 +15,8 @@ export const categoriesData = [
         id: 'foods',
         title: 'Maistas',
         image: require('../assets/food.png'),
-        similarCategories: ['animals', 'activities'],
-        oppositeCategories: ['clothing', 'people'],
+        similarCategories: ['activities', 'clothing'],
+        oppositeCategories: ['numbers', 'colors'],
         images: [
             { id: 'f1', src: require('../assets/images/food/apple.png'), description: 'Obuolys', score: 0 },
             { id: 'f2', src: require('../assets/images/food/banana.png'), description: 'Bananas', score: 0 },
@@ -28,8 +28,8 @@ export const categoriesData = [
         id: 'activities',
         title: 'Veikla',
         image: require('../assets/activities.png'),
-        similarCategories: ['foods', 'animals'],
-        oppositeCategories: ['clothing', 'emotions'],
+        similarCategories: ['emotions', 'people'],
+        oppositeCategories: ['colors', 'shapes'],
         images: [
             { id: 'ac1', src: require('../assets/images/activities/sleep.png'), description: 'Miegoti', score: 0 },
             { id: 'ac2', src: require('../assets/images/activities/eat.png'), description: 'Valgyti', score: 0 },
@@ -41,8 +41,8 @@ export const categoriesData = [
         id: 'clothing',
         title: 'Apranga',
         image: require('../assets/clothes.png'),
-        similarCategories: ['emotions', 'people'],
-        oppositeCategories: ['foods', 'activities'],
+        similarCategories: ['colors', 'shapes'],
+        oppositeCategories: ['animals', 'numbers'],
         images: [
             { id: 'cl1', src: require('../assets/images/clothes/shirt.png'), description: 'Marškinėliai', score: 0 },
             { id: 'cl2', src: require('../assets/images/clothes/pants.png'), description: 'Kelnės', score: 0 },
@@ -54,8 +54,8 @@ export const categoriesData = [
         id: 'emotions',
         title: 'Emocijos',
         image: require('../assets/emotions.png'),
-        similarCategories: ['clothing', 'people'],
-        oppositeCategories: ['animals', 'activities'],
+        similarCategories: ['activities', 'people'],
+        oppositeCategories: ['numbers', 'shapes'],
         images: [
             { id: 'e1', src: require('../assets/images/emotions/happy.png'), description: 'Laimingas', score: 0 },
             { id: 'e2', src: require('../assets/images/emotions/sad.png'), description: 'Liūdnas', score: 0 },
@@ -67,8 +67,8 @@ export const categoriesData = [
         id: 'people',
         title: 'Žmonės',
         image: require('../assets/family.png'),
-        similarCategories: ['clothing', 'emotions'],
-        oppositeCategories: ['animals', 'foods'],
+        similarCategories: ['animals', 'emotions'],
+        oppositeCategories: ['numbers', 'colors'],
         images: [
             { id: 'p1', src: require('../assets/images/people/mother.png'), description: 'Mama', score: 0 },
             { id: 'p2', src: require('../assets/images/people/father.png'), description: 'Tėtis', score: 0 },
@@ -82,8 +82,8 @@ export const categoriesData = [
         id: 'colors',
         title: 'Spalvos',
         image: require('../assets/colors.png'),
-        similarCategories: ['shapes', 'numbers'],
-        oppositeCategories: ['emotions', 'people'],
+        similarCategories: ['clothing', 'shapes'],
+        oppositeCategories: ['activities', 'animals'],
         images: [
             { id: 'c1', src: require('../assets/images/colors/green.png'), description: 'Žalia', score: 0 },
             { id: 'c2', src: require('../assets/images/colors/blue.png'), description: 'Mėlyna', score: 0 },
@@ -94,8 +94,8 @@ export const categoriesData = [
         id: 'shapes',
         title: 'Formos',
         image: require('../assets/images/shapes/square.png'),
-        similarCategories: ['colors', 'numbers'],
-        oppositeCategories: ['foods', 'clothing'],
+        similarCategories: ['colors', 'clothing'],
+        oppositeCategories: ['animals', 'emotions'],
         images: [
             { id: 's1', src: require('../assets/images/shapes/circle.png'), description: 'Apskritimas', score: 0 },
             { id: 's2', src: require('../assets/images/shapes/square.png'), description: 'Kvadratas', score: 0 },
@@ -107,8 +107,8 @@ export const categoriesData = [
         id: 'numbers',
         title: 'Skaičiai',
         image: require('../assets/images/numbers/number-1.png'),
-        similarCategories: ['colors', 'shapes'],
-        oppositeCategories: ['animals', 'emotions'],
+        similarCategories: ['shapes', 'colors'],
+        oppositeCategories: ['animals', 'people'],
         images: [
             { id: 'n1', src: require('../assets/images/numbers/number-1.png'), description: 'Vienas', score: 0 },
             { id: 'n2', src: require('../assets/images/numbers/number-2.png'), description: 'Du', score: 0 },
@@ -122,19 +122,6 @@ export const categoriesData = [
             { id: 'n10', src: require('../assets/images/numbers/number-10.png'), description: 'Dešimt', score: 0 },
         ],
     },
-    // {
-    //     id: 'letters',
-    //     title: 'Raidės',
-    //     image: require('../assets/letters.png'),
-    //     similarCategories: ['numbers', 'colors'],
-    //     oppositeCategories: ['animals', 'foods'],
-    //     images: [
-    //         { id: 'l1', src: require('../assets/images/letters/a.png'), description: 'A', score: 0 },
-    //         { id: 'l2', src: require('../assets/images/letters/b.png'), description: 'B', score: 0 },
-    //         { id: 'l3', src: require('../assets/images/letters/c.png'), description: 'C', score: 0 },
-    //         { id: 'l4', src: require('../assets/images/letters/d.png'), description: 'D', score: 0 },
-    //     ],
-    // },
 ];
 
 export default categoriesData;

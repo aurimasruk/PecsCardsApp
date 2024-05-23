@@ -76,7 +76,7 @@ const RecommendedScreen = () => {
         console.log('Fetching scores after delay');
         await loadScores();
         setFeedbackLoading(false);
-      }, 1000); // delay
+      }, 1000); // Delay
     }
   };
 

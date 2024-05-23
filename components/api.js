@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const axiosInstance = axios.create({
+const axiosInstance = axios.create({      // Connection with Android emulator
   baseURL: 'http://10.0.2.2:5000',
   timeout: 30000,
 });

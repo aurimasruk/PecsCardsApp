@@ -18,17 +18,16 @@ q_table = np.zeros([env.observation_space.n, env.action_space.n])
 session_q_table = np.zeros([env.observation_space.n, env.action_space.n])
 
 # Parameters
-learning_rate = 0.8
-discount_factor = 0.9
-exploration_rate = 1.0
+learning_rate = 0.5
+discount_factor = 0.99
+exploration_rate = 0.8
 max_exploration_rate = 1.0
 min_exploration_rate = 0.001
-exploration_decay_rate = 0.01
-max_steps = 100  # Define a maximum number of steps per episode
-total_episodes = 1000  # Define total episodes for training
+exploration_decay_rate = 0.5
+max_steps = 100                 # Maximum number of steps per episode
+total_episodes = 1000           # Total episodes for training
 
-# Configure logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)    # Configure logging
 
 # Load scores and mappings from a file
 scores_path = os.path.join(os.path.dirname(__file__), 'scores.json')
@@ -47,7 +46,7 @@ if os.path.exists(id_to_state_path):
 else:
     id_to_state = {}
 
-# Ensure the environment is reset before starting
+# Environment is reset before starting
 state = env.reset()
 if isinstance(state, tuple):
     state = state[0]
@@ -96,8 +95,8 @@ def feedback():
         
         next_state, env_reward, done, truncated, info = env.step(action)
         
-        if env_reward == 1.0:
-            logging.info(f"REWARD 1.0 ACHIEVED - State: {state}, Action: {action}, Reward: {reward}, Next State: {next_state}, Done: {done}")
+        # if env_reward == 1.0:
+        #     logging.info(f"REWARD 1.0 ACHIEVED - State: {state}, Action: {action}, Reward: {reward}, Next State: {next_state}, Done: {done}")
         # else:
         #     logging.debug(f"State: {state}, Action: {action}, Reward: {reward}, Env Reward: {env_reward}, Next State: {next_state}, Done: {done}")
         
@@ -115,7 +114,13 @@ def feedback():
         q_values = q_table[id_to_state[image_id]]
         highest_q_value = np.max(q_values)
         mean_q_value = np.mean(q_values)
-        normalized_score = (highest_q_value + mean_q_value) / 2  # Simple normalization
+        
+        # New normalization method
+        user_feedback_weight = 0.7  # Weight given to user feedback
+        q_value_weight = 0.3        # Weight given to Q-table values
+
+        normalized_score = user_feedback_weight * score + q_value_weight * (highest_q_value + mean_q_value) / 2
+        # normalized_score = (highest_q_value + mean_q_value) / 2  # Previous normalization approach
         
         scores[image_id] = float(normalized_score)
         session_scores[image_id] = float(normalized_score)
@@ -150,14 +155,12 @@ def reset_environment():
     scores.clear()
     with open(scores_path, 'w') as f:
         json.dump(scores, f)
-    
-    # Reset Q-table
-    q_table = np.zeros([env.observation_space.n, env.action_space.n])
+
+    q_table = np.zeros([env.observation_space.n, env.action_space.n])   # Reset Q-table
     
     reset_session_environment()
     
-    # Reset exploration rate
-    exploration_rate = max_exploration_rate
+    exploration_rate = max_exploration_rate     # Reset exploration rate
     
     # Emit the reset scores to all clients
     socketio.emit('scores_updated', scores)
@@ -178,8 +181,7 @@ def reset_session_environment():
     with open(session_scores_path, 'w') as f:
         json.dump(session_scores, f)
     
-    # Reset session Q-table
-    session_q_table = np.zeros([env.observation_space.n, env.action_space.n])
+    session_q_table = np.zeros([env.observation_space.n, env.action_space.n])   # Reset session Q-table
     
     # Emit the reset scores to all clients
     socketio.emit('scores_updated', session_scores)
@@ -213,12 +215,12 @@ def test_feedback():
 @app.route('/run-automated-feedback', methods=['POST'])
 def run_automated_feedback():
     try:
-        # Path to automated_feedback.py script
+        # Automated_feedback.py script
         script_path = os.path.join(os.path.dirname(__file__), 'automated_feedback.py')
         
         result = subprocess.run(['python', script_path], capture_output=True, text=True)
         
-        # Check if the script ran successfully
+        # Check if the script was ran successfully
         if result.returncode != 0:
             logging.error(f"Error running automated_feedback.py: {result.stderr}")
             return jsonify({"error": "Failed to run automated feedback script", "details": result.stderr}), 500
@@ -245,10 +247,10 @@ def get_session_scores():
 def run_tests():
     try:
         # Define ranges for each parameter
-        learning_rates = [0.1, 0.2, 0.5, 0.8]
-        discount_factors = [0.99, 0.9, 0.8]
-        exploration_rates = [1.0, 0.9, 0.8]
-        exploration_decay_rates = [0.99, 0.8, 0.2, 0.05]
+        learning_rates = [0.1, 0.2, 0.3, 0.5]
+        discount_factors = [0.99, 0.8, 0.6]
+        exploration_rates = [1.0, 0.8, 0.6]
+        exploration_decay_rates = [0.9, 0.5, 0.1]
         
         test_cases = []
         
@@ -292,8 +294,8 @@ def run_tests():
                     next_state, env_reward, done, truncated, info = env.step(action)
                     reward = env_reward
                     
-                    if env_reward == 1.0:
-                        logging.info(f"REWARD 1.0 ACHIEVED - State: {state}, Action: {action}, Reward: {reward}, Next State: {next_state}, Done: {done}")
+                    # if env_reward == 1.0:
+                    #     logging.info(f"REWARD 1.0 ACHIEVED - State: {state}, Action: {action}, Reward: {reward}, Next State: {next_state}, Done: {done}")
                     
                     update_q_table(q_table, state, action, reward, next_state, done, env_reward)
                     update_q_table(session_q_table, state, action, reward, next_state, done, env_reward)
@@ -306,7 +308,7 @@ def run_tests():
                 
                 # logging.debug(f"Episode {episode + 1} finished with total reward: {total_reward}")
             
-            # Simulate feedback to evaluate performance
+            # Simulate feedback to eval performance
             for image_id in id_to_state.keys():
                 for _ in range(10):  # Number of feedbacks per image
                     feedback_data = {

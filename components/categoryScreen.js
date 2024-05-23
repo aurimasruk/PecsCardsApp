@@ -37,7 +37,7 @@ const CategoryScreen = ({ route }) => {
     setModalVisible(false);
   };
 
-  return (
+  return ( // Card view and scoring system
     <ScrollView contentContainerStyle={styles.container}>
       {currentCategory.images.map((image, index) => (
         <TouchableOpacity key={index} onPress={() => openImage(image)} style={styles.imageContainer}>
@@ -60,7 +60,7 @@ const CategoryScreen = ({ route }) => {
             </TouchableOpacity>
             {selectedImage && <Image source={selectedImage.src} style={styles.fullscreenImage} />}
             <Text style={styles.imageDescription}>{selectedImage ? selectedImage.description : ''}</Text>
-            <View style={styles.smileyContainer}>
+            <View style={styles.smileyContainer}>  
               <TouchableOpacity onPress={() => handleFeedback(4)}>
                 <Image source={require('../assets/very-happy.png')} style={styles.smileyIcon} />
               </TouchableOpacity>
